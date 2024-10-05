@@ -28,6 +28,10 @@ export class WebLarekModel {
 		this.events.emit('items:change');
 	}
 
+	getCatalog() {
+		return this.catalog;
+	}
+
 	getBasket() {
 		return this.items;
 	}
