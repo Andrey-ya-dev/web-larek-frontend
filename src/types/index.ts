@@ -26,7 +26,9 @@ export interface IOrder {
 }
 export type TOrder = Omit<IOrder, 'items' | 'total'>;
 
-export type TBasket = Pick<IOrder, 'items' | 'total'>
+export type TBasket = Pick<IOrder, 'items' | 'total'>;
+
+export type TOrderField = 'address' | 'phone' | 'email';
 
 export interface IOrderSuccess {
 	id: string;
