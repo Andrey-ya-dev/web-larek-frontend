@@ -85,6 +85,7 @@ export class WebLarekModel {
 	}
 
 	get basketTotal() {
+		this.calculateBasketPrice(this.catalog);
 		return this.basket.total;
 	}
 
@@ -107,9 +108,14 @@ export class WebLarekModel {
 	}
 
 	calculateBasketPrice(data: IProductItem[]) {
-		this.basket.total = this.items.reduce((acc, curr, idx) => {
-			const { price } = data[idx];
-			return acc + price;
+		this.basket.total = this.items.reduce((acc, curr) => {
+			const product = data.find((item) => item.id === curr);
+			if (product) {
+				const { price } = product;
+				return acc + price;
+			} else {
+				return acc + 0;
+			}
 		}, 0);
 	}
 

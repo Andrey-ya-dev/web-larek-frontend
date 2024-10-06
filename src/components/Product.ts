@@ -2,7 +2,9 @@ import { IProductItem } from '../types';
 import { Component } from './base/Component';
 import { IEvents } from './base/events';
 
-export class Product extends Component<IProductItem> {
+type TBasketProduct = Partial<IProductItem> & { total: string };
+
+export class Product extends Component<TBasketProduct> {
 	protected _id: string;
 	protected card: HTMLElement;
 	protected cardCategory: HTMLElement;
@@ -12,7 +14,11 @@ export class Product extends Component<IProductItem> {
 	protected cardDescription: HTMLElement;
 	protected cardButton: HTMLElement;
 
-	constructor(protected container: HTMLElement, protected events?: IEvents) {
+	constructor(
+		protected container: HTMLElement,
+		protected events?: IEvents,
+		actions?: { onClick: (event: MouseEvent) => void }
+	) {
 		super(container);
 
 		this.cardCategory = container.querySelector('.card__category');
@@ -22,24 +28,27 @@ export class Product extends Component<IProductItem> {
 		this.cardDescription = container.querySelector('.card__text');
 		this.cardButton = container.querySelector('.card__button');
 
-		if (this.cardButton) {
-			this.cardButton.addEventListener('click', (e: Event) => {
-				e.stopPropagation();
-				console.log('add btn card ', this._id);
+		if (actions?.onClick) {
+			if (this.cardButton) {
+				this.cardButton.addEventListener('click', (e) => {
+					actions.onClick(e);
+				});
+			} else {
+				this.container.addEventListener('click', (e: Event) => {
+					console.log('set card ', this._id);
 
-				this.events.emit('item:add', { id: this._id });
-			});
+					this.events.emit('select:item', { id: this._id });
+				});
+			}
 		}
-
-		this.container.addEventListener('click', (e: Event) => {
-			console.log('set card ', this._id);
-
-			this.events.emit('select:item', { id: this._id });
-		});
 	}
 
 	set id(id: string) {
 		this._id = id;
+	}
+
+	get id() {
+		return this._id;
 	}
 
 	set title(value: string) {
@@ -65,22 +74,29 @@ export class Product extends Component<IProductItem> {
 	set description(value: string) {
 		this.setText(this.cardDescription, value);
 	}
+
+	blockBtn() {
+		this.setDisabled(this.cardButton, true);
+	}
+
+	unBlockBtn() {
+		this.setDisabled(this.cardButton, false);
+	}
 }
 
 export class BasketProduct extends Product {
 	protected removeBtn: HTMLElement;
 	protected productIdx: HTMLElement;
 
-	constructor(protected container: HTMLElement, protected evetns: IEvents) {
-		super(container);
+	constructor(
+		protected container: HTMLElement,
+		protected events: IEvents,
+		actions?: { onClick: (event: MouseEvent) => void }
+	) {
+		super(container, events, actions);
 
 		this.removeBtn = container.querySelector('.card__button');
 		this.productIdx = container.querySelector('.basket__item-index');
-
-		this.container.addEventListener('click', null);
-		this.removeBtn.addEventListener('click', () => {
-			console.log('remove btn');
-		});
 	}
 
 	set price(value: string) {
@@ -90,5 +106,9 @@ export class BasketProduct extends Product {
 		} else {
 			this.cardPrice.textContent = `0`;
 		}
+	}
+
+	set total(value: string) {
+		this.setText(this.productIdx, value);
 	}
 }
