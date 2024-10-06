@@ -33,7 +33,9 @@ export class WebLarekModel {
 	}
 
 	getBasket() {
-		return this.items;
+		return this.items.map((itemId) => {
+			return this.catalog.find((item) => item.id === itemId);
+		});
 	}
 
 	getItem(id: string) {
@@ -41,8 +43,8 @@ export class WebLarekModel {
 	}
 
 	selectItem(id: string) {
-		this.selectedItemId = this.getItem(id)?.id;
-		this.events.emit('select:item');
+		console.log('select larek ', id);
+		this.selectedItemId = id;
 	}
 
 	getSelectedItem() {
@@ -80,6 +82,10 @@ export class WebLarekModel {
 
 	get items() {
 		return this.basket.items;
+	}
+
+	get basketTotal() {
+		return this.basket.total;
 	}
 
 	addItemInBasket(id: string) {

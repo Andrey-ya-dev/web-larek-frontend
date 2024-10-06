@@ -25,12 +25,16 @@ export class Product extends Component<IProductItem> {
 		if (this.cardButton) {
 			this.cardButton.addEventListener('click', (e: Event) => {
 				e.stopPropagation();
+				console.log('add btn card ', this._id);
+
 				this.events.emit('item:add', { id: this._id });
 			});
 		}
 
-		this.container.addEventListener('click', () => {
+		this.container.addEventListener('click', (e: Event) => {
 			console.log('set card ', this._id);
+
+			this.events.emit('select:item', { id: this._id });
 		});
 	}
 
