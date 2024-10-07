@@ -91,6 +91,7 @@ export class Order extends Component<{ option: string }> {
 
 	clearOrder() {
 		this.orderInput.value = '';
+		this.address = '';
 		this.orderBtnCash.classList.remove('button_alt-active');
 		this.orderBtnCard.classList.remove('button_alt-active');
 		this.validation();

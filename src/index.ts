@@ -152,24 +152,27 @@ events.on(
 		});
 
 		if (webLarekModel.isOrderValid()) {
+			const finalOrder = webLarekModel.getFinalOrder().total;
 			console.log(
 				'order ',
 				JSON.parse(JSON.stringify(webLarekModel.getOrder()))
 			);
+
+			modal.content = success.render({ infoPrice: finalOrder });
+		} else {
+			console.warn('order wrong ', webLarekModel.getOrder());
 		}
 	}
 );
 
 events.on('order:success:open', () => {
-	const total = webLarekModel.basketTotal;
-
-	modal.content = success.render({ infoPrice: total });
+	webLarekModel.clearBasketData();
+	order.clearOrder();
+	formContacts.clearForm();
 });
 
 events.on('order:success:close', () => {
-	webLarekModel.clearBasketData();
-	webLarekModel.clearOrderData();
-	page.basketCount = webLarekModel.getBasketCountItems();
+	webLarekModel.cOrder();
 	modal.close();
 });
 

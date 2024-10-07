@@ -13,6 +13,7 @@ export class Success extends Component<{ infoPrice: number }> {
 
 		this.button.addEventListener('click', () => {
 			this.events.emit('order:success:close');
+			this.events.emit('items:change');
 		});
 	}
 

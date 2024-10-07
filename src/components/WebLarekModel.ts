@@ -61,7 +61,7 @@ export class WebLarekModel {
 
 	setOrderContact(name: TOrderField, value: string) {
 		this.order[name] = value;
-		this.events.emit('contacts:change');
+		// this.events.emit('contacts:change');
 	}
 
 	isOrderValid() {
@@ -70,8 +70,13 @@ export class WebLarekModel {
 
 	getOrder() {
 		if (this.isOrderValid()) {
-			return Object.assign(this.order, this.basket);
+			return this.order;
 		}
+	}
+
+	getFinalOrder() {
+		const order = { ...this.order, ...this.basket };
+		return order;
 	}
 
 	set items(data: string[]) {
@@ -140,5 +145,14 @@ export class WebLarekModel {
 				this.setOrderContact(field, '');
 			}
 		});
+	}
+
+	cOrder() {
+		this.order = {
+			address: '',
+			email: '',
+			payment: '',
+			phone: '',
+		};
 	}
 }
