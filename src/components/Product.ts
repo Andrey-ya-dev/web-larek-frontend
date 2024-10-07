@@ -100,11 +100,10 @@ export class BasketProduct extends Product {
 	}
 
 	set price(value: string) {
-		console.log(value, 'price');
 		if (value && value !== 'null') {
-			this.cardPrice.textContent = `${value}`;
+			this.setText(this.cardPrice, `${value}`);
 		} else {
-			this.cardPrice.textContent = `0`;
+			this.setText(this.cardPrice, `0`);
 		}
 	}
 

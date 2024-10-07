@@ -43,7 +43,6 @@ export class WebLarekModel {
 	}
 
 	selectItem(id: string) {
-		console.log('select larek ', id);
 		this.selectedItemId = id;
 	}
 
@@ -53,7 +52,7 @@ export class WebLarekModel {
 
 	setPaymentOption(option: TPaymentOption) {
 		this.order.payment = option;
-		this.events.emit('payment:change');
+		this.events.emit('order:change');
 	}
 
 	getPaymentOption() {
@@ -84,6 +83,10 @@ export class WebLarekModel {
 		return this.basket.items;
 	}
 
+	set basketTotal(value: number) {
+		this.basket.total = value;
+	}
+
 	get basketTotal() {
 		this.calculateBasketPrice(this.catalog);
 		return this.basket.total;
@@ -108,13 +111,14 @@ export class WebLarekModel {
 	}
 
 	calculateBasketPrice(data: IProductItem[]) {
-		this.basket.total = this.items.reduce((acc, curr) => {
+		const notFoundPrice = 0;
+		this.basketTotal = this.items.reduce((acc, curr) => {
 			const product = data.find((item) => item.id === curr);
 			if (product) {
 				const { price } = product;
 				return acc + price;
 			} else {
-				return acc + 0;
+				return acc + notFoundPrice;
 			}
 		}, 0);
 	}
@@ -124,7 +128,17 @@ export class WebLarekModel {
 	}
 
 	clearBasketData() {
-		this.basket = { items: [], total: 0 };
-		this.events.emit('basket:change');
+		this.items = [];
+		this.basketTotal = 0;
+	}
+
+	clearOrderData() {
+		Object.keys(this.order).forEach((field: TOrderField & 'payment') => {
+			if (field === 'payment') {
+				this.setPaymentOption('');
+			} else {
+				this.setOrderContact(field, '');
+			}
+		});
 	}
 }
