@@ -55,7 +55,7 @@ events.on('model:item:select', (item: { id: string }) => {
 
 events.on('view:item:select', (item: { id: string }) => {
 	console.log('view-item-select ', item.id);
-	//api get
+	//api getOneProduct
 	const { id } = item;
 	const isItemInBasket = webLarekModel.isItemInBasket(id);
 	const itemData = webLarekModel.getSelectedItem();
@@ -196,6 +196,15 @@ events.on('view:contacts:submit', () => {
 			'order ',
 			JSON.parse(JSON.stringify(webLarekModel.getFinalOrder()))
 		);
+
+		api
+			.order(webLarekModel.getFinalOrder())
+			.then((data) => {
+				console.log(data, ' --- > data');
+			})
+			.catch((err) => {
+				console.warn(err);
+			});
 
 		modal.content = success.render({ infoPrice: finalOrder });
 	} else {
