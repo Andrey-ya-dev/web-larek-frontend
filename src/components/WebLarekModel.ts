@@ -13,6 +13,7 @@ export class WebLarekModel {
 		items: [],
 		total: 0,
 	};
+	// сменить на контакты??
 	protected order: TOrder = {
 		address: '',
 		phone: '',
@@ -44,6 +45,9 @@ export class WebLarekModel {
 
 	selectItem(id: string) {
 		this.selectedItemId = id;
+		this.events.emit('view:item:select', {
+			id,
+		});
 	}
 
 	getSelectedItem() {
@@ -52,7 +56,7 @@ export class WebLarekModel {
 
 	setPaymentOption(option: TPaymentOption) {
 		this.order.payment = option;
-		this.events.emit('order:change');
+		this.events.emit('view:payment:select');
 	}
 
 	getPaymentOption() {
@@ -61,7 +65,8 @@ export class WebLarekModel {
 
 	setOrderContact(name: TOrderField, value: string) {
 		this.order[name] = value;
-		// this.events.emit('contacts:change');
+		this.events.emit('view:order:submit');
+		this.events.emit('view:contacts:submit');
 	}
 
 	isOrderValid() {
@@ -81,7 +86,7 @@ export class WebLarekModel {
 
 	set items(data: string[]) {
 		this.basket.items = data;
-		this.events.emit('basket:change');
+		this.events.emit('view:basket:change');
 	}
 
 	get items() {
@@ -101,7 +106,8 @@ export class WebLarekModel {
 		if (!this.isItemInBasket(id)) {
 			this.basket.items.push(id);
 			this.calculateBasketPrice(this.catalog);
-			this.events.emit('basket:change');
+			this.events.emit('view:item:add');
+			this.events.emit('view:basket:change');
 		}
 	}
 
@@ -112,7 +118,8 @@ export class WebLarekModel {
 	removeItemFromBasket(id: string) {
 		this.items = this.items.filter((itemId) => itemId !== id);
 		this.calculateBasketPrice(this.catalog);
-		this.events.emit('basket:change');
+		this.events.emit('view:item:remove');
+		this.events.emit('view:basket:change');
 	}
 
 	calculateBasketPrice(data: IProductItem[]) {

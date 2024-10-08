@@ -37,7 +37,7 @@ export class Product extends Component<TBasketProduct> {
 				this.container.addEventListener('click', () => {
 					console.log('set card ', this._id);
 
-					this.events.emit('select:item', { id: this._id });
+					this.events.emit('model:item:select', { id: this._id });
 				});
 			}
 		}

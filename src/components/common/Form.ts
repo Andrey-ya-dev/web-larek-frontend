@@ -19,12 +19,12 @@ export class Form extends Component<{ contacts: string }> {
 			if (inp.name === 'email') {
 				inp.addEventListener('input', () => {
 					this.email = this.inputEmail.value;
-					this.events.emit('contacts:change');
+					this.events.emit('view:contacts:change');
 				});
 			} else {
 				inp.addEventListener('input', () => {
 					this.phone = this.inputPhone.value;
-					this.events.emit('contacts:change');
+					this.events.emit('view:contacts:change');
 				});
 			}
 		});
@@ -32,16 +32,15 @@ export class Form extends Component<{ contacts: string }> {
 		this.container.addEventListener('submit', (e) => {
 			e.preventDefault();
 
-			// console.log('contacts ---');
 			if (this.validation()) {
-				this.events.emit('contacts:submit', {
+				this.events.emit('model:contacts:submit', {
 					contacts: {
 						[this.inputEmail.name]: this.email,
 						[this.inputPhone.name]: this.phone,
 					},
 				});
 
-				this.events.emit('order:success:open');
+				this.events.emit('view:success:open');
 			} else {
 				console.log('no valid contacts');
 			}
@@ -63,5 +62,11 @@ export class Form extends Component<{ contacts: string }> {
 			inp.value = '';
 			this.validation();
 		});
+		this.clearFormData();
+	}
+
+	clearFormData() {
+		this.email = '';
+		this.phone = '';
 	}
 }

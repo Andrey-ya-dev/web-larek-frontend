@@ -29,41 +29,34 @@ export class Order extends Component<{ option: string }> {
 			const option = this.getOption(this.orderBtnCard);
 			this.setOption(true);
 
-			this.events.emit('payment:select', {
+			this.events.emit('model:payment:select', {
 				payment: option,
 			});
-			this.events.emit('order:change');
+			this.events.emit('model:order:change');
 		});
 
 		this.orderBtnCash.addEventListener('click', () => {
 			this.setOption(true);
 
-			this.events.emit('payment:select', {
+			this.events.emit('model:payment:select', {
 				payment: this.orderBtnCash.getAttribute('name'),
 			});
-			this.events.emit('order:change');
+			this.events.emit('model:order:change');
 		});
 
 		this.orderInput.addEventListener('input', () => {
 			this.address = this.orderInput.value;
-			// console.log(this._address, 'address');
-
-			if (this.validation()) {
-				console.log('valid - input');
-			}
-			// this.events.emit('address:input', { value: this.orderInput.value });
-			// this.events.emit('order:change');
+			this.events.emit('view:order:change');
 		});
 
 		this.container.addEventListener('submit', (e) => {
 			e.preventDefault();
 			if (this.validation()) {
-				// console.log('submit-order');
-				this.events.emit('order:submit', {
+				this.events.emit('model:order:submit', {
 					name: this.orderInput.name,
 					value: this.orderInput.value,
 				});
-				this.events.emit('contacts:open');
+				this.events.emit('view:contacts:open');
 			}
 		});
 	}
@@ -102,7 +95,6 @@ export class Order extends Component<{ option: string }> {
 	}
 
 	selectOption(name: TPaymentOption) {
-		// console.log('order ouline');
 		if (name === 'card') {
 			this.orderBtnCard.classList.add('button_alt-active');
 			this.orderBtnCash.classList.remove('button_alt-active');
