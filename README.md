@@ -47,14 +47,15 @@ yarn build
 
 ## Данные и типы данных, используемые в приложении
 
-Типы данных в проeкте реализованы в папке `types/index.ts`.
+Основные типы данных в проeкте реализованы в папке `types/index.ts`.
 
-Данные получаемые при загрузке списка товара с сервера
+Данные получаемые при загрузке списка товара с сервера\
+Находится в файле `src/components/base/api`
 
 ```
-interface IProductList {
+type ApiListResponse<Type> = {
 	total: number;
-	items: IProductItem[];
+	items: Type[];
 }
 ```
 
@@ -84,34 +85,25 @@ interface IOrder {
 }
 ```
 
-Интерфейс ответа сервера при успешно заказе
-
-```
-interface IOrderSuccess {
-	id: string;
-	total: number;
-}
-```
-
 Данные корзины
 
 ```
 type TBasket = Pick<IOrder, 'items' | 'total'>
 ```
 
-Данные для полей которые вводятся пользователем
+Имена полей в которые вводятся данные пользователем
 
 ```
 type TOrderField = 'address' | 'phone' | 'email';
 ```
 
-Данные продукта используемые в корзине
+Данные товара используемые в корзине
 
 ```
 type TProductInBasket = Pick<IProductItem, 'id' | 'title' | 'price'>;
 ```
 
-Данные продукта используемые в каталоге
+Данные товар используемые в каталоге
 
 ```
 type TProductInCatalog = Omit<IProductItem, 'description'>;
@@ -123,10 +115,19 @@ type TProductInCatalog = Omit<IProductItem, 'description'>;
 type TPaymentOption = 'card' | 'cash' | '';
 ```
 
-Интерфейс ответа сервера при отсутствик запрашеваемого товара
+Интерфейс ответа сервера при успешно заказе
 
 ```
-interface NotFoundItem {
+interface IOrderSuccess {
+	id: string;
+	total: number;
+}
+```
+
+Интерфейс ответа сервера при возникновение ошибки
+
+```
+interface ErrorMessage {
 	error: string;
 }
 ```

@@ -28,14 +28,30 @@ const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
 const loaderTemplate = ensureElement<HTMLTemplateElement>('#loader');
 
-const page = new Page(document.querySelector('.page__wrapper'), events);
+const page = new Page(document.querySelector('.page'), events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new Order(cloneTemplate(orderTemplate), events);
 const formContacts = new Form(cloneTemplate(contactsTemplate), events);
 const success = new Success(cloneTemplate(successTemplate), events);
-const loader = new Loader(cloneTemplate(loaderTemplate), events);
-document.body.append(loader.showLoader().render());
+const loader = new Loader(cloneTemplate(loaderTemplate));
+// document.body.append(loader.showLoader().render());
+page.loader = loader.render();
+loader.showLoader();
+
+function fakeReq(timeOut: number, item: Record<string, string>) {
+	loader.showLoader();
+	setTimeout(() => {
+		return Promise.resolve()
+			.then(() => {
+				webLarekModel.selectItem(item.id);
+			})
+			.catch((err) => console.warn(err))
+			.finally(() => {
+				loader.hideLoader();
+			});
+	}, timeOut);
+}
 
 // Слушатели событий
 
@@ -54,9 +70,11 @@ events.on('items:change', () => {
 });
 // Выбор продука для просмотра
 events.on('model:item:select', (item: { id: string }) => {
-	loader.showLoader();
-	webLarekModel.selectItem(item.id);
-	loader.hideLoader();
+	// loader.showLoader();
+	// webLarekModel.selectItem(item.id);
+	// loader.hideLoader();
+
+	fakeReq(1000, item);
 
 	// api
 	// 	.getOneProduct(item.id)
@@ -224,7 +242,7 @@ events.on('view:contacts:submit', () => {
 		setTimeout(() => {
 			return Promise.resolve('data')
 				.then((data) => {
-					console.log(data);
+					console.log(data, 'Promise');
 				})
 				.catch((err) => console.warn(err))
 				.finally(() => {

@@ -87,6 +87,7 @@ export class Order extends Component<{ option: string }> {
 		this.address = '';
 		this.orderBtnCash.classList.remove('button_alt-active');
 		this.orderBtnCard.classList.remove('button_alt-active');
+		this.setOption(false);
 		this.validation();
 	}
 

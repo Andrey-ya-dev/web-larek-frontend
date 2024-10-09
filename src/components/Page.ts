@@ -5,6 +5,7 @@ import { IEvents } from './base/events';
 interface IPage {
 	catalog: HTMLElement[];
 	basketCount: number;
+	loader: HTMLElement;
 }
 
 export class Page extends Component<IPage> {
@@ -36,6 +37,6 @@ export class Page extends Component<IPage> {
 	}
 
 	set loader(element: HTMLElement) {
-		this.catalogContaner.append(element);
+		this.container.append(element);
 	}
 }

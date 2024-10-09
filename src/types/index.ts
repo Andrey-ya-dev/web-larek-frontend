@@ -1,8 +1,3 @@
-export interface IProductList {
-	total: number;
-	items: IProductItem[];
-}
-
 export interface IProductItem {
 	id: string;
 	description: string;
@@ -35,6 +30,6 @@ export interface IOrderSuccess {
 	total: number;
 }
 
-export interface NotFoundItem {
+export interface ErrorMessage {
 	error: string;
 }
