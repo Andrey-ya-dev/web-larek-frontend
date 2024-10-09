@@ -5,7 +5,6 @@ import { CDN_URL, API_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { EventEmitter } from './components/base/events';
 import { WebLarekModel } from './components/WebLarekModel';
-import { BasketProduct, Product } from './components/Product';
 import { Page } from './components/Page';
 import { Modal } from './components/common/Modal';
 import { Basket } from './components/common/Basket';
@@ -13,6 +12,8 @@ import { TOrderField, TPaymentOption } from './types';
 import { Order } from './components/Order';
 import { Form } from './components/common/Form';
 import { Success } from './components/common/Success';
+import { Loader } from './components/common/Loader';
+import { BasketItemCard, ProductItemCard } from './components/Card';
 
 const events = new EventEmitter();
 const api = new WebLarekAPI(CDN_URL, API_URL);
@@ -25,6 +26,7 @@ const basketCardTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
+const loaderTemplate = ensureElement<HTMLTemplateElement>('#loader');
 
 const page = new Page(document.querySelector('.page__wrapper'), events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
@@ -32,6 +34,8 @@ const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new Order(cloneTemplate(orderTemplate), events);
 const formContacts = new Form(cloneTemplate(contactsTemplate), events);
 const success = new Success(cloneTemplate(successTemplate), events);
+const loader = new Loader(cloneTemplate(loaderTemplate), events);
+document.body.append(loader.showLoader().render());
 
 // Слушатели событий
 
@@ -40,7 +44,7 @@ events.on('items:change', () => {
 	console.log('items-changed');
 
 	const elements = webLarekModel.getCatalog().map((item) => {
-		return new Product(cloneTemplate(cardCatalogTemplate), events, {
+		return new ProductItemCard(cloneTemplate(cardCatalogTemplate), events, {
 			onClick: () => events.emit('model:item:select', item),
 		}).render(item);
 	});
@@ -50,7 +54,19 @@ events.on('items:change', () => {
 });
 // Выбор продука для просмотра
 events.on('model:item:select', (item: { id: string }) => {
+	loader.showLoader();
 	webLarekModel.selectItem(item.id);
+	loader.hideLoader();
+
+	// api
+	// 	.getOneProduct(item.id)
+	// 	.then((product) => {
+	// 		webLarekModel.selectItem(product.id);
+	// 	})
+	// 	.catch((err) => console.warn(err))
+	// 	.finally(() => {
+	// 		loader.hideLoader();
+	// 	});
 });
 
 events.on('view:item:select', (item: { id: string }) => {
@@ -60,14 +76,18 @@ events.on('view:item:select', (item: { id: string }) => {
 	const isItemInBasket = webLarekModel.isItemInBasket(id);
 	const itemData = webLarekModel.getSelectedItem();
 
-	const cardFullInfo = new Product(cloneTemplate(cardFullTemplate), events, {
-		onClick: () => events.emit('model:item:add', itemData),
-	});
+	const cardFullInfo = new ProductItemCard(
+		cloneTemplate(cardFullTemplate),
+		events,
+		{
+			onClick: () => events.emit('model:item:add', itemData),
+		}
+	);
 
 	if (isItemInBasket) {
-		cardFullInfo.blockBtn();
+		// cardFullInfo.blockBtn();
 	} else {
-		cardFullInfo.unBlockBtn();
+		// cardFullInfo.unBlockBtn();
 	}
 
 	modal.content = cardFullInfo.render(itemData);
@@ -109,7 +129,7 @@ events.on('view:basket:change', () => {
 
 	const elements = webLarekModel.getBasket().map((item, idx) => {
 		const currentNumber = idx + 1;
-		return new BasketProduct(cloneTemplate(basketCardTemplate), events, {
+		return new BasketItemCard(cloneTemplate(basketCardTemplate), events, {
 			onClick: () => events.emit('model:item:remove', item),
 		}).render({
 			id: item.id,
@@ -191,34 +211,58 @@ events.on('view:contacts:submit', () => {
 
 	// view success open
 	if (webLarekModel.isOrderValid()) {
+		loader.showLoader();
+		// modal.content = document.createElement('div');
+		modal.close();
+
 		const finalOrder = webLarekModel.getFinalOrder().total;
 		console.log(
 			'order ',
 			JSON.parse(JSON.stringify(webLarekModel.getFinalOrder()))
 		);
 
-		api
-			.order(webLarekModel.getFinalOrder())
-			.then((data) => {
-				console.log(data, ' --- > data');
-			})
-			.catch((err) => {
-				console.warn(err);
-			});
+		setTimeout(() => {
+			return Promise.resolve('data')
+				.then((data) => {
+					console.log(data);
+				})
+				.catch((err) => console.warn(err))
+				.finally(() => {
+					console.log('finally');
+					loader.hideLoader();
+					modal.content = success.render({ infoPrice: finalOrder });
+					modal.open();
+				});
+		}, 1000);
 
-		modal.content = success.render({ infoPrice: finalOrder });
+		// api
+		// 	.order(webLarekModel.getFinalOrder())
+		// 	.then((data) => {
+		// 		console.log(data, ' --- > data');
+		// 	})
+		// 	.catch((err) => {
+		// 		console.warn(err);
+		// 	})
+		// 	.finally(() => {
+		// 		loader.hideLoader();
+		// 		modal.content = success.render({ infoPrice: finalOrder });
+		// 	});
 	} else {
 		console.warn('order wrong ', webLarekModel.getOrder());
 	}
 });
 // Успешный заказ
 events.on('view:success:open', () => {
+	console.log('view-success-open');
+
 	webLarekModel.clearBasketData();
 	order.clearOrder();
 	formContacts.clearForm();
 });
 
 events.on('view:success:done', () => {
+	console.log('view-success-done');
+
 	webLarekModel.cOrder();
 	modal.close();
 });
@@ -237,9 +281,15 @@ events.on('modal:close', () => {
 		.classList.remove('page__wrapper_locked');
 });
 
-api.getProductList().then((data) => {
-	webLarekModel.setCatalog(data.items);
-});
+api
+	.getProductList()
+	.then((data) => {
+		webLarekModel.setCatalog(data.items);
+	})
+	.catch((err) => console.warn(err))
+	.finally(() => {
+		loader.hideLoader();
+	});
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 window.larek = webLarekModel;

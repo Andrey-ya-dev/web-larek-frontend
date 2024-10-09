@@ -34,4 +34,8 @@ export class Page extends Component<IPage> {
 	set basketCount(value: number) {
 		this.setText(this.basketCountElement, `${value}`);
 	}
+
+	set loader(element: HTMLElement) {
+		this.catalogContaner.append(element);
+	}
 }

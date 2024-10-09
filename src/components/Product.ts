@@ -1,4 +1,5 @@
 import { IProductItem } from '../types';
+import { bem } from '../utils/utils';
 import { Component } from './base/Component';
 import { IEvents } from './base/events';
 
@@ -23,8 +24,8 @@ export class Product extends Component<TBasketProduct> {
 
 		this.cardCategory = container.querySelector('.card__category');
 		this.cardTitle = container.querySelector('.card__title');
-		this.cardImage = container.querySelector('.card__image');
 		this.cardPrice = container.querySelector('.card__price');
+		this.cardImage = container.querySelector('.card__image');
 		this.cardDescription = container.querySelector('.card__text');
 		this.cardButton = container.querySelector('.card__button');
 
@@ -32,6 +33,7 @@ export class Product extends Component<TBasketProduct> {
 			if (this.cardButton) {
 				this.cardButton.addEventListener('click', (e) => {
 					actions.onClick(e);
+					this.setCategoryCls('soft');
 				});
 			} else {
 				this.container.addEventListener('click', () => {
@@ -57,6 +59,8 @@ export class Product extends Component<TBasketProduct> {
 
 	set category(value: string) {
 		this.setText(this.cardCategory, value);
+		console.log(value);
+		this.setCategoryCls(value);
 	}
 
 	set image(value: string) {
@@ -81,6 +85,30 @@ export class Product extends Component<TBasketProduct> {
 
 	unBlockBtn() {
 		this.setDisabled(this.cardButton, false);
+	}
+
+	setCategoryCls(category: string) {
+		const categoryOptions = {
+			['другое']: 'other',
+			['софт-скил']: 'soft',
+			['кнопка']: 'button',
+			['хард-скил']: 'hard',
+			['дополнительное']: 'additional',
+		};
+		const clsValue = bem(
+			'card',
+			'category',
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			`${categoryOptions[category]}`
+		);
+		const rcls = this.cardCategory.classList[1];
+		this.cardCategory.classList.replace(rcls, clsValue.class.replace('.', ''));
+		console.log(this.cardCategory.classList);
+		console.log(clsValue);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		console.log(categoryOptions[category]);
 	}
 }
 
