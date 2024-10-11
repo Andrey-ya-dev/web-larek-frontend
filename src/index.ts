@@ -9,7 +9,7 @@ import { Page } from './components/Page';
 import { Modal } from './components/common/Modal';
 import { Basket } from './components/common/Basket';
 import { TOrderField, TPaymentOption } from './types';
-import { Order } from './components/Order';
+import { Order, _Order } from './components/Order';
 import { Form } from './components/common/Form';
 import { Success } from './components/common/Success';
 import { Loader } from './components/common/Loader';
@@ -89,7 +89,7 @@ events.on('model:item:select', (item: { id: string }) => {
 
 events.on('view:item:select', (item: { id: string }) => {
 	console.log('view-item-select ', item.id);
-	//api getOneProduct
+
 	const { id } = item;
 	const isItemInBasket = webLarekModel.isItemInBasket(id);
 	const itemData = webLarekModel.getSelectedItem();
@@ -103,9 +103,9 @@ events.on('view:item:select', (item: { id: string }) => {
 	);
 
 	if (isItemInBasket) {
-		// cardFullInfo.blockBtn();
+		cardFullInfo.disabledBtn();
 	} else {
-		// cardFullInfo.unBlockBtn();
+		cardFullInfo.unDisabledBtn();
 	}
 
 	modal.content = cardFullInfo.render(itemData);
@@ -114,13 +114,14 @@ events.on('view:item:select', (item: { id: string }) => {
 
 // Действия с продуктом
 events.on('model:item:add', (item: { id: string }) => {
+	console.log('model-item-add ');
+
 	webLarekModel.addItemInBasket(item.id);
 });
 
 events.on('view:item:add', () => {
 	console.log('view-item-add ');
 
-	// page.basketCount = webLarekModel.getBasketCountItems(); // ??
 	modal.close();
 });
 
@@ -130,16 +131,16 @@ events.on('model:item:remove', (item: { id: string }) => {
 	webLarekModel.removeItemFromBasket(item.id);
 });
 
-events.on('view:item:remove', () => {
-	console.log('view item remove ');
-
-	// page.basketCount = webLarekModel.getBasketCountItems(); //??
-});
 // Корзина
 events.on('view:basket:open', () => {
+	console.log('view-basket-open ');
+
 	basket.selected = webLarekModel.items;
-	modal.content = basket.render();
-	modal.open();
+	// modal.content = basket.render();
+	// modal.open();
+	modal.render({
+		content: basket.render(),
+	});
 });
 
 events.on('view:basket:change', () => {
@@ -165,8 +166,13 @@ events.on('view:basket:change', () => {
 // Заказ
 events.on('view:order:open', () => {
 	console.log('view-order-open');
-
-	modal.content = order.render();
+	const _order = new _Order(cloneTemplate(orderTemplate), events, {
+		onClick: (name) => {
+			console.log('_order name ', name);
+			webLarekModel.setPaymentOption(name as TPaymentOption);
+		},
+	});
+	modal.content = _order.render({ errors: [''], valid: false });
 });
 
 events.on('model:payment:select', (option: { payment: TPaymentOption }) => {
@@ -196,6 +202,9 @@ events.on(
 );
 
 // view order submit -> проверка ошибок показать ошибку
+events.on('order:submit', () => {
+	console.log('order-submit');
+});
 
 // Форма контактов
 events.on('view:contacts:open', () => {

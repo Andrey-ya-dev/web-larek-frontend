@@ -88,15 +88,23 @@ export class ProductItemCard extends Card {
 		this.setText(this.cardDescription, value);
 	}
 
-	private replaceCls(value: string) {
-		const rcls = this.cardCategory.classList[1];
+	disabledBtn() {
+		this.setDisabled(this.cardButton, true);
+	}
+
+	unDisabledBtn() {
+		this.setDisabled(this.cardButton, false);
+	}
+
+	replaceCls(value: string) {
+		const replaceCls = this.cardCategory.classList[1];
 		this.cardCategory.classList.replace(
-			rcls,
+			replaceCls,
 			bem('card', 'category', `${value}`).class.replace('.', '')
 		);
 	}
 
-	private setCategoryCls(category: string) {
+	setCategoryCls(category: string) {
 		switch (category) {
 			case 'другое':
 				this.replaceCls('other');

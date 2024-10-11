@@ -5,44 +5,42 @@ import { IEvents } from './base/events';
 export class Order extends Component<{ option: string }> {
 	protected orderButton: HTMLElement;
 	protected orderInput: HTMLInputElement;
-	protected orderBtnCash: HTMLElement;
-	protected orderBtnCard: HTMLElement;
+	// protected orderBtnCash: HTMLElement;
+	// protected orderBtnCard: HTMLElement;
 	protected orderForm: HTMLFormElement;
 	protected orderContactForm: HTMLFormElement;
 	protected _address = '';
 	protected isOptionPicked = false;
+	protected buttonList: HTMLElement;
 
 	constructor(protected container: HTMLElement, protected events: IEvents) {
 		super(container);
 
 		this.orderButton = this.container.querySelector('.order__button');
 		this.orderInput = this.container.querySelector('input[name="address"]');
-		this.orderBtnCash = this.container.querySelector('button[name="cash"]');
-		this.orderBtnCard = this.container.querySelector('button[name="card"]');
+		// this.orderBtnCash = this.container.querySelector('button[name="cash"]');
+		// this.orderBtnCard = this.container.querySelector('button[name="card"]');
 		this.orderContactForm = this.container.querySelector(
 			'form[name="contacts"]'
 		);
+		this.buttonList = this.container.querySelector('.order__buttons');
 
-		// console.log(this.orderForm, this.container, ' order form');
+		// this.orderBtnCard.addEventListener('click', () => {
+		// 	const option = this.getOption(this.orderBtnCard);
+		// 	this.setOption(true);
 
-		this.orderBtnCard.addEventListener('click', () => {
-			const option = this.getOption(this.orderBtnCard);
-			this.setOption(true);
+		// 	this.events.emit('model:payment:select', {
+		// 		payment: option,
+		// 	});
+		// });
 
-			this.events.emit('model:payment:select', {
-				payment: option,
-			});
-			this.events.emit('model:order:change');
-		});
+		// this.orderBtnCash.addEventListener('click', () => {
+		// 	this.setOption(true);
 
-		this.orderBtnCash.addEventListener('click', () => {
-			this.setOption(true);
-
-			this.events.emit('model:payment:select', {
-				payment: this.orderBtnCash.getAttribute('name'),
-			});
-			this.events.emit('model:order:change');
-		});
+		// 	this.events.emit('model:payment:select', {
+		// 		payment: this.orderBtnCash.getAttribute('name'),
+		// 	});
+		// });
 
 		this.orderInput.addEventListener('input', () => {
 			this.address = this.orderInput.value;
@@ -85,8 +83,8 @@ export class Order extends Component<{ option: string }> {
 	clearOrder() {
 		this.orderInput.value = '';
 		this.address = '';
-		this.orderBtnCash.classList.remove('button_alt-active');
-		this.orderBtnCard.classList.remove('button_alt-active');
+		// this.orderBtnCash.classList.remove('button_alt-active');
+		// this.orderBtnCard.classList.remove('button_alt-active');
 		this.setOption(false);
 		this.validation();
 	}
@@ -97,13 +95,100 @@ export class Order extends Component<{ option: string }> {
 
 	selectOption(name: TPaymentOption) {
 		if (name === 'card') {
-			this.orderBtnCard.classList.add('button_alt-active');
-			this.orderBtnCash.classList.remove('button_alt-active');
+			// this.orderBtnCard.classList.add('button_alt-active');
+			// this.orderBtnCash.classList.remove('button_alt-active');
 			this.validation();
 		} else {
-			this.orderBtnCard.classList.remove('button_alt-active');
-			this.orderBtnCash.classList.add('button_alt-active');
+			// this.orderBtnCard.classList.remove('button_alt-active');
+			// this.orderBtnCash.classList.add('button_alt-active');
 			this.validation();
 		}
+	}
+
+	set tabs(buttons: HTMLElement) {
+		this.buttonList.replaceChildren(buttons);
+	}
+}
+
+interface IFormState {
+	valid: boolean;
+	errors: string[];
+}
+
+export class _Form<T> extends Component<IFormState> {
+	protected errorsContainer: HTMLElement;
+	protected submitButton: HTMLButtonElement;
+
+	constructor(protected container: HTMLFormElement, protected events: IEvents) {
+		super(container);
+
+		this.submitButton = this.container.querySelector('button[type="submit"]');
+		this.errorsContainer = this.container.querySelector('.form__errors');
+
+		this.container.addEventListener('input', (e: Event) => {
+			const target = e.target as HTMLInputElement;
+			const value = target.value;
+			const targetName = target.name;
+			this.onChangeInput(targetName, value);
+		});
+
+		this.container.addEventListener('submit', (e) => {
+			e.preventDefault();
+			this.events.emit(`${this.container.name}:submit`);
+		});
+	}
+
+	onChangeInput(name: string, value: string) {
+		this.events.emit(`${name}:change`, { value, name });
+	}
+
+	set valid(value: boolean) {
+		this.submitButton.disabled = !value;
+	}
+
+	set errors(value: string) {
+		this.setText(this.errorsContainer, value);
+	}
+
+	render(state: Partial<T> & IFormState) {
+		const { valid, errors, ...inputs } = state;
+		super.render({ valid, errors });
+		Object.assign(this, inputs);
+		return this.container;
+	}
+}
+
+export class _Order extends _Form<object> {
+	protected buttons: HTMLButtonElement[] = [];
+	protected btnContainer: HTMLElement;
+
+	constructor(
+		protected container: HTMLFormElement,
+		protected events: IEvents,
+		protected actions?: {
+			onClick: (name: string) => void;
+		}
+	) {
+		super(container, events);
+
+		this.btnContainer = this.container.querySelector('.order__buttons');
+		this.buttons = [...this.btnContainer.querySelectorAll('button')];
+
+		this.buttons.forEach((btn) => {
+			//events
+			btn.addEventListener('click', () => {
+				actions?.onClick?.(btn.name);
+				//names
+				//setdisabled
+				this.selectOption(btn.name);
+			});
+		});
+	}
+
+	selectOption(name: string) {
+		this.buttons.forEach((btn) => {
+			this.toggleClass(btn, 'button_alt-active', btn.name === name);
+			this.setDisabled(btn, btn.name === name);
+		});
 	}
 }

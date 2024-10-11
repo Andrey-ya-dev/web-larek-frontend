@@ -65,7 +65,7 @@ export class WebLarekModel {
 
 	setOrderContact(name: TOrderField, value: string) {
 		this.order[name] = value;
-		this.events.emit('view:order:submit');
+		this.events.emit('view:order:submit'); //??
 		this.events.emit('view:contacts:submit');
 	}
 
@@ -118,7 +118,6 @@ export class WebLarekModel {
 	removeItemFromBasket(id: string) {
 		this.items = this.items.filter((itemId) => itemId !== id);
 		this.calculateBasketPrice(this.catalog);
-		this.events.emit('view:item:remove');
 		this.events.emit('view:basket:change');
 	}
 
