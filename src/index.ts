@@ -353,18 +353,18 @@ events.on('view:contacts:submit', () => {
 	}
 });
 // Успешный заказ
-events.on('view:success:open', () => {
-	console.log('view-success-open');
+// events.on('view:success:open', () => {
+// 	console.log('view-success-open');
 
-	webLarekModel.clearBasketData();
-	order.clearOrder();
-	formContacts.clearForm();
-});
+// 	webLarekModel.clearBasketData();
+// 	order.clearOrder();
+// 	formContacts.clearForm();
+// });
 
 events.on('view:success:done', () => {
 	console.log('view-success-done');
 
-	webLarekModel.cOrder();
+	// webLarekModel.cOrder();
 	modal.close();
 });
 
