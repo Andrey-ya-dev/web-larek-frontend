@@ -9,7 +9,7 @@ import { Page } from './components/Page';
 import { Modal } from './components/common/Modal';
 import { Basket } from './components/common/Basket';
 import { TOrderField, TPaymentOption } from './types';
-import { Order, _Order } from './components/Order';
+import { Order, _Contacts, _Order } from './components/Order';
 import { Form } from './components/common/Form';
 import { Success } from './components/common/Success';
 import { Loader } from './components/common/Loader';
@@ -32,7 +32,14 @@ const page = new Page(document.querySelector('.page'), events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new Order(cloneTemplate(orderTemplate), events);
+const _order = new _Order(cloneTemplate(orderTemplate), events, {
+	onClick: (name) => {
+		console.log('_order name ', name);
+		events.emit('model:payment:select', { payment: name });
+	},
+});
 const formContacts = new Form(cloneTemplate(contactsTemplate), events);
+const _contacts = new _Contacts(cloneTemplate(contactsTemplate), events);
 const success = new Success(cloneTemplate(successTemplate), events);
 const loader = new Loader(cloneTemplate(loaderTemplate));
 // document.body.append(loader.showLoader().render());
@@ -44,6 +51,7 @@ function fakeReq(timeOut: number, item: Record<string, string>) {
 	setTimeout(() => {
 		return Promise.resolve()
 			.then(() => {
+				webLarekModel.selectItem(null);
 				webLarekModel.selectItem(item.id);
 			})
 			.catch((err) => console.warn(err))
@@ -74,7 +82,7 @@ events.on('model:item:select', (item: { id: string }) => {
 	// webLarekModel.selectItem(item.id);
 	// loader.hideLoader();
 
-	fakeReq(1000, item);
+	fakeReq(500, item);
 
 	// api
 	// 	.getOneProduct(item.id)
@@ -91,6 +99,7 @@ events.on('view:item:select', (item: { id: string }) => {
 	console.log('view-item-select ', item.id);
 
 	const { id } = item;
+	// можно возвращать обьект {isInBsket,selectedEl}
 	const isItemInBasket = webLarekModel.isItemInBasket(id);
 	const itemData = webLarekModel.getSelectedItem();
 
@@ -124,7 +133,8 @@ events.on('view:item:add', () => {
 
 	modal.close();
 });
-
+//&&&&&&&&&&&&&&&&&&&&& до этой линии норм
+// действия из корзины
 events.on('model:item:remove', (item: { id: string }) => {
 	console.log('model-item-add ', item.id);
 
@@ -134,7 +144,7 @@ events.on('model:item:remove', (item: { id: string }) => {
 // Корзина
 events.on('view:basket:open', () => {
 	console.log('view-basket-open ');
-
+	// basketItems ??
 	basket.selected = webLarekModel.items;
 	// modal.content = basket.render();
 	// modal.open();
@@ -166,70 +176,134 @@ events.on('view:basket:change', () => {
 // Заказ
 events.on('view:order:open', () => {
 	console.log('view-order-open');
-	const _order = new _Order(cloneTemplate(orderTemplate), events, {
-		onClick: (name) => {
-			console.log('_order name ', name);
-			webLarekModel.setPaymentOption(name as TPaymentOption);
-		},
-	});
-	modal.content = _order.render({ errors: [''], valid: false });
+
+	modal.content = _order.render({ errors: [''], valid: false, address: '' });
 });
 
 events.on('model:payment:select', (option: { payment: TPaymentOption }) => {
+	console.log('model-payment-select');
+
 	webLarekModel.setPaymentOption(option.payment);
 });
 
-events.on('view:payment:select', () => {
-	console.log('view-payment-select');
+// events.on('view:payment:select', () => {
+// 	console.log('view-payment-select');
 
-	const paymentOption = webLarekModel.getPaymentOption();
-	order.selectOption(paymentOption);
-});
+// 	// const paymentOption = webLarekModel.getPaymentOption();
+// 	// order.selectOption(paymentOption);
+// });
 
-events.on('view:order:change', () => {
-	console.log('view-order-change');
+// events.on('view:order:change', () => {
+// 	console.log('view-order-change');
 
-	order.validation();
-});
+// 	order.validation();
+// });
 
-events.on(
-	'model:order:submit',
-	(adress: { name: TOrderField; value: string }) => {
-		console.log('model-order-submit');
+// events.on(
+// 	'model:order:submit',
+// 	(adress: { name: TOrderField; value: string }) => {
+// 		console.log('model-order-submit');
 
-		webLarekModel.setOrderContact(adress.name, adress.value);
-	}
-);
+// 		webLarekModel.setOrderContact(adress.name, adress.value);
+// 	}
+// );
 
 // view order submit -> проверка ошибок показать ошибку
 events.on('order:submit', () => {
 	console.log('order-submit');
+
+	events.emit('view:contacts:open');
+});
+events.on('address:change', (adress: { name: TOrderField; value: string }) => {
+	console.log('address-change = ', adress);
+
+	webLarekModel.setOrderContact(adress.name, adress.value);
+});
+events.on('phone:change', (adress: { name: TOrderField; value: string }) => {
+	console.log('phone-change = ', adress);
+
+	webLarekModel.setOrderContact(adress.name, adress.value);
+});
+events.on('email:change', (adress: { name: TOrderField; value: string }) => {
+	console.log('phone-change = ', adress);
+
+	webLarekModel.setOrderContact(adress.name, adress.value);
+});
+events.on('step:one:valid', () => {
+	const stepOneValue = webLarekModel.validateStepOne();
+	const message = webLarekModel.getAddressError();
+	console.log('message = ', message);
+	_order.valid = stepOneValue;
+	_order.errors = message;
+});
+events.on('step:two:valid', () => {
+	const stepTwoValue = webLarekModel.validateStepTwo();
+	const message = webLarekModel.getContactsError();
+	console.log('message = ', message);
+	_contacts.valid = stepTwoValue;
+	_contacts.errors = message;
 });
 
 // Форма контактов
 events.on('view:contacts:open', () => {
 	console.log('view-contacts-open');
 
-	formContacts.validation();
-	modal.content = formContacts.render();
+	// formContacts.validation();
+	// modal.content = formContacts.render();
+	modal.content = _contacts.render({
+		phone: '',
+		email: '',
+		errors: [],
+		valid: false,
+	});
+});
+events.on('contacts:submit', () => {
+	console.log('contacts-submit');
+
+	events.emit('success:open');
+});
+events.on('success:open', () => {
+	// modal.render({
+	// 	content: success.render({
+	// 		infoPrice: webLarekModel.getFinalOrder().total,
+	// 	}),
+	// });
+	loader.showLoader();
+	setTimeout(() => {
+		return Promise.resolve(webLarekModel.getFinalOrder().total)
+			.then((data) => {
+				modal.render({
+					content: success.render({
+						infoPrice: data,
+					}),
+				});
+			})
+			.catch((err) => console.warn(err))
+			.finally(() => {
+				_order.clearData();
+				webLarekModel.cOrder();
+				webLarekModel.clearBasketData();
+				loader.hideLoader();
+			});
+	}, 2000);
 });
 
-events.on('view:contacts:change', () => {
-	console.log('view-contacts-change');
+// events.on('view:contacts:change', () => {
+// 	console.log('view-contacts-change');
 
-	formContacts.validation();
-});
+// 	formContacts.validation();
+// });
 
-events.on(
-	'model:contacts:submit',
-	(data: { contacts: Record<TOrderField, string> }) => {
-		console.log('model:contacts:submit ');
+// events.on(
+// 	'model:contacts:submit',
+// 	(data: { contacts: Record<TOrderField, string> }) => {
+// 		console.log('model:contacts:submit ');
 
-		Object.keys(data.contacts).forEach((key: TOrderField) => {
-			webLarekModel.setOrderContact(key, data.contacts[key]);
-		});
-	}
-);
+// 		Object.keys(data.contacts).forEach((key: TOrderField) => {
+// 			webLarekModel.setOrderContact(key, data.contacts[key]);
+// 		});
+// 	}
+// );
 
 // view contacts submit -> проверка ошибок показать ошибку
 

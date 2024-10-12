@@ -57,6 +57,7 @@ export class WebLarekModel {
 	setPaymentOption(option: TPaymentOption) {
 		this.order.payment = option;
 		this.events.emit('view:payment:select');
+		this.events.emit('step:one:valid');
 	}
 
 	getPaymentOption() {
@@ -66,7 +67,12 @@ export class WebLarekModel {
 	setOrderContact(name: TOrderField, value: string) {
 		this.order[name] = value;
 		this.events.emit('view:order:submit'); //??
-		this.events.emit('view:contacts:submit');
+		// this.events.emit('view:contacts:submit');
+		if (name === 'address') {
+			this.events.emit('step:one:valid');
+		} else {
+			this.events.emit('step:two:valid');
+		}
 	}
 
 	isOrderValid() {
@@ -143,22 +149,60 @@ export class WebLarekModel {
 		this.basketTotal = 0;
 	}
 
-	clearOrderData() {
-		Object.keys(this.order).forEach((field: TOrderField & 'payment') => {
-			if (field === 'payment') {
-				this.setPaymentOption('');
-			} else {
-				this.setOrderContact(field, '');
-			}
-		});
-	}
-
 	cOrder() {
+		this.selectedItemId = undefined;
+		this.setPaymentOption('');
 		this.order = {
 			address: '',
 			email: '',
 			payment: '',
 			phone: '',
 		};
+	}
+
+	validateStepOne() {
+		return (
+			this.order.address.length > 0 &&
+			(this.order.payment === 'card' || this.order.payment === 'cash')
+		);
+	}
+
+	validateStepTwo() {
+		return this.order.phone.length > 0 && this.order.email.length > 0;
+	}
+
+	getContactsError() {
+		const { phone, email } = this.order;
+		if (!phone && !email) {
+			return 'Both fields are empty';
+		}
+		if (!phone.length) {
+			return 'Phone is empty';
+		}
+		if (!email.length) {
+			return 'Email is empty';
+		}
+		return '';
+	}
+
+	getAddressError() {
+		if (!this.order.address.length) {
+			return 'Address is empty';
+		}
+		return '';
+	}
+
+	getErrorMsg(obj: Record<string, string>, msg: string) {
+		const errorStore: Record<string, string> = {}; //Set,Map
+		Object.keys(obj).forEach((key: string) => {
+			if (!key.length) {
+				errorStore[key] = `${key} ${msg}`;
+			}
+		});
+		return errorStore;
+	}
+
+	validateSomeObj(obj: Record<string, string>) {
+		return !!Object.values(obj).filter((str) => str.length > 0).length;
 	}
 }

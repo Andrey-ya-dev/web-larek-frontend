@@ -1,4 +1,4 @@
-import { TPaymentOption } from '../types';
+import { IOrder, TOrderField, TPaymentOption } from '../types';
 import { Component } from './base/Component';
 import { IEvents } from './base/events';
 
@@ -158,7 +158,7 @@ export class _Form<T> extends Component<IFormState> {
 	}
 }
 
-export class _Order extends _Form<object> {
+export class _Order extends _Form<IOrder> {
 	protected buttons: HTMLButtonElement[] = [];
 	protected btnContainer: HTMLElement;
 
@@ -175,11 +175,8 @@ export class _Order extends _Form<object> {
 		this.buttons = [...this.btnContainer.querySelectorAll('button')];
 
 		this.buttons.forEach((btn) => {
-			//events
 			btn.addEventListener('click', () => {
 				actions?.onClick?.(btn.name);
-				//names
-				//setdisabled
 				this.selectOption(btn.name);
 			});
 		});
@@ -190,5 +187,29 @@ export class _Order extends _Form<object> {
 			this.toggleClass(btn, 'button_alt-active', btn.name === name);
 			this.setDisabled(btn, btn.name === name);
 		});
+	}
+
+	set address(value: string) {
+		(this.container.elements.namedItem('address') as HTMLInputElement).value =
+			value;
+	}
+
+	clearData() {
+		this.buttons.forEach((btn) => {
+			btn.classList.remove('button_alt-active');
+			this.setDisabled(btn, false);
+		});
+	}
+}
+
+export class _Contacts extends _Form<{ phone: string; email: string }> {
+	set phone(value: string) {
+		(this.container.elements.namedItem('phone') as HTMLInputElement).value =
+			value;
+	}
+
+	set email(value: string) {
+		(this.container.elements.namedItem('email') as HTMLInputElement).value =
+			value;
 	}
 }
