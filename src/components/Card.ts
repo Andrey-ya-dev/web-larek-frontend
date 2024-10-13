@@ -3,7 +3,7 @@ import { bem } from '../utils/utils';
 import { Component } from './base/Component';
 import { IEvents } from './base/events';
 
-type TCard = Partial<IProductItem & { total: string }>;
+type TCard = Partial<IProductItem & { total: string; buttonText: string }>;
 type TActions = {
 	onClick: (e: MouseEvent) => void;
 };
@@ -29,7 +29,6 @@ export class Card extends Component<TCard> {
 			if (this.cardButton) {
 				this.cardButton.addEventListener('click', (e) => {
 					actions.onClick(e);
-					console.log('card parent'.toUpperCase(), this);
 				});
 			} else {
 				this.container.addEventListener('click', () => {
@@ -86,6 +85,10 @@ export class ProductItemCard extends Card {
 
 	set description(value: string) {
 		this.setText(this.cardDescription, value);
+	}
+
+	set buttonText(value: string) {
+		this.setText(this.cardButton, value);
 	}
 
 	disabledBtn() {

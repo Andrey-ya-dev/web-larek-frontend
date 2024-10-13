@@ -12,8 +12,7 @@ export class Success extends Component<{ infoPrice: number }> {
 		this.button = this.container.querySelector('.button');
 
 		this.button.addEventListener('click', () => {
-			this.events.emit('view:success:done');
-			// this.events.emit('items:change');
+			this.events.emit('order:done');
 		});
 	}
 

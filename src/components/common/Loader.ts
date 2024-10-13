@@ -6,11 +6,10 @@ export class Loader extends Component<object> {
 	}
 
 	showLoader() {
-		console.log('show');
-		this.container.style.display = 'flex';
+		this.setVisible(this.container);
 	}
 
 	hideLoader() {
-		this.container.style.display = 'none';
+		this.setHidden(this.container);
 	}
 }

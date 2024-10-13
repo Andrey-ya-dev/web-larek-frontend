@@ -1,72 +1,50 @@
 import { Component } from '../base/Component';
 import { IEvents } from '../base/events';
 
-export class Form extends Component<{ contacts: string }> {
-	protected inputEmail: HTMLInputElement;
-	protected inputPhone: HTMLInputElement;
-	protected formButton: HTMLButtonElement;
-	protected email = '';
-	protected phone = '';
+interface IFormState {
+	valid: boolean;
+	errors: string[];
+}
 
-	constructor(protected container: HTMLElement, protected events: IEvents) {
+export class Form<T> extends Component<IFormState> {
+	protected errorsContainer: HTMLElement;
+	protected submitButton: HTMLButtonElement;
+
+	constructor(protected container: HTMLFormElement, protected events: IEvents) {
 		super(container);
 
-		this.inputEmail = this.container.querySelector('input[name="email"]');
-		this.inputPhone = this.container.querySelector('input[name="phone"]');
-		this.formButton = this.container.querySelector('.button');
+		this.submitButton = this.container.querySelector('button[type="submit"]');
+		this.errorsContainer = this.container.querySelector('.form__errors');
 
-		this.container.querySelectorAll('input').forEach((inp) => {
-			if (inp.name === 'email') {
-				inp.addEventListener('input', () => {
-					this.email = this.inputEmail.value;
-					this.events.emit('view:contacts:change');
-				});
-			} else {
-				inp.addEventListener('input', () => {
-					this.phone = this.inputPhone.value;
-					this.events.emit('view:contacts:change');
-				});
-			}
+		this.container.addEventListener('input', (e: Event) => {
+			const target = e.target as HTMLInputElement;
+			const value = target.value;
+			const targetName = target.name;
+			this.onChangeInput(targetName, value);
 		});
 
 		this.container.addEventListener('submit', (e) => {
 			e.preventDefault();
-
-			if (this.validation()) {
-				this.events.emit('model:contacts:submit', {
-					contacts: {
-						[this.inputEmail.name]: this.email,
-						[this.inputPhone.name]: this.phone,
-					},
-				});
-
-				this.events.emit('view:success:open');
-			} else {
-				console.log('no valid contacts');
-			}
+			this.events.emit(`${this.container.name}:submit`);
 		});
 	}
 
-	validation() {
-		console.log('form validation');
-		if (this.email.length > 0 && this.phone.length > 0) {
-			this.setDisabled(this.formButton, false);
-		} else {
-			this.setDisabled(this.formButton, true);
-		}
-		return this.email.length > 0 && this.phone.length > 0;
+	onChangeInput(name: string, value: string) {
+		this.events.emit(`${this.container.name}:${name}:change`, { value, name });
 	}
 
-	clearForm() {
-		this.container.querySelectorAll('input').forEach((inp) => {
-			inp.value = '';
-			this.validation();
-		});
-		this.clearFormData();
+	set valid(value: boolean) {
+		this.submitButton.disabled = !value;
 	}
 
-	clearFormData() {
-		this.email = '';
-		this.phone = '';
+	set errors(value: string) {
+		this.setText(this.errorsContainer, value);
+	}
+
+	render(state: Partial<T> & IFormState) {
+		const { valid, errors, ...inputs } = state;
+		super.render({ valid, errors });
+		Object.assign(this, inputs);
+		return this.container;
 	}
 }

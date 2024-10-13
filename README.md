@@ -214,6 +214,8 @@ interface ErrorMessage {
 - `_content: HTMLElement` - содержимое модального окна
 - `events: IEvents` - брокер событий
 
+#### Класс Form
+
 #### Класс Card
 
 #### Класс ProductItemCard
@@ -222,13 +224,15 @@ interface ErrorMessage {
 
 #### Класс Basket
 
-#### Класс Form
-
 #### Класс Order
+
+#### Класс Contacts
 
 #### Класс Page
 
 #### Класс Success
+
+#### Класс Loader
 
 ### Слой коммуникации
 

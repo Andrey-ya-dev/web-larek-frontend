@@ -1,5 +1,4 @@
 import {
-	IOrder,
 	IProductItem,
 	TBasket,
 	TOrder,
@@ -14,12 +13,11 @@ export class WebLarekModel {
 		items: [],
 		total: 0,
 	};
-	// сменить на контакты??
 	protected contacts: Pick<TOrder, 'email' | 'phone'> = {
 		phone: '',
 		email: '',
 	};
-	protected order: Partial<TOrder> = {
+	protected order: Pick<TOrder, 'address' | 'payment'> = {
 		address: '',
 		payment: '',
 	};
@@ -60,7 +58,7 @@ export class WebLarekModel {
 	setPaymentOption(option: TPaymentOption) {
 		this.order.payment = option;
 		this.events.emit('view:payment:select');
-		this.events.emit('step:one:valid');
+		this.validateDatas();
 	}
 
 	getPaymentOption() {
@@ -70,12 +68,11 @@ export class WebLarekModel {
 	setOrderContact(name: TOrderField, value: string) {
 		if (name === 'address') {
 			this.order[name] = value;
-			this.events.emit('step:one:valid');
+			this.validateDatas();
 		} else {
 			this.contacts[name] = value;
-			this.events.emit('step:two:valid');
+			this.validateDatas();
 		}
-		this.validateDatas();
 	}
 
 	isDatasValid(obj: Partial<TOrder>) {
@@ -87,7 +84,6 @@ export class WebLarekModel {
 	}
 
 	getOrder() {
-		// if (this.isDatasValid(this.order)) {}
 		return this.order;
 	}
 
@@ -96,7 +92,7 @@ export class WebLarekModel {
 			return this.getItem(item).price > 0;
 		});
 		const order = { ...this.order, ...this.contacts, ...this.basket };
-		return order as IOrder;
+		return order;
 	}
 
 	set items(data: string[]) {
@@ -130,9 +126,13 @@ export class WebLarekModel {
 		return this.items.find((itemId) => itemId === id);
 	}
 
-	removeItemFromBasket(id: string) {
+	removeItemFromBasket(id: string, isBasket?: boolean) {
 		this.items = this.items.filter((itemId) => itemId !== id);
 		this.calculateBasketPrice(this.catalog);
+
+		if (!isBasket) {
+			this.events.emit('view:item:remove');
+		}
 		this.events.emit('view:basket:change');
 	}
 
@@ -158,9 +158,9 @@ export class WebLarekModel {
 		this.basketTotal = 0;
 	}
 
-	cOrder() {
+	clearOrderData() {
 		this.selectedItemId = undefined;
-		this.setPaymentOption('');
+		// this.setPaymentOption('');
 		this.order = {
 			address: '',
 			payment: '',
@@ -171,32 +171,6 @@ export class WebLarekModel {
 		};
 	}
 
-	validateStepOne() {
-		return (
-			this.order.address.length > 0 &&
-			(this.order.payment === 'card' || this.order.payment === 'cash')
-		);
-	}
-	validateOrder() {
-		const orderError: Record<string, string> = {};
-		if (!this.order.address) {
-			orderError.address = 'Необходимо указать адрес';
-		}
-		if (!this.order.payment) {
-			orderError.address = 'Необходимо выбрать способ оплаты';
-		}
-		return orderError;
-	}
-	validateContacts() {
-		const contactsError: Record<string, string> = {};
-		if (!this.contacts.phone) {
-			contactsError.phone = 'Необходимо указать телефон';
-		}
-		if (!this.contacts.email) {
-			contactsError.email = 'Необходимо указать email';
-		}
-		return contactsError;
-	}
 	validateDatas() {
 		const datasError: Record<string, string> = {};
 		if (!this.contacts.phone) {
@@ -208,45 +182,7 @@ export class WebLarekModel {
 		if (!this.order.address) {
 			datasError.address = 'Необходимо указать адрес';
 		}
-		if (!this.order.payment) {
-			datasError.address = 'Необходимо выбрать способ оплаты';
-		}
 		this.events.emit('formErrors:change', datasError);
 		return datasError;
-	}
-
-	validateStepTwo() {
-		return this.contacts.phone.length > 0 && this.contacts.email.length > 0;
-	}
-
-	getContactsError() {
-		const { phone, email } = this.contacts;
-		if (!phone && !email) {
-			return 'Both fields are empty';
-		}
-		if (!phone.length) {
-			return 'Phone is empty';
-		}
-		if (!email.length) {
-			return 'Email is empty';
-		}
-		return '';
-	}
-
-	getAddressError() {
-		if (!this.order.address.length) {
-			return 'Address is empty';
-		}
-		return '';
-	}
-
-	getErrorMsg(obj: Record<string, string>, msg: string) {
-		const errorStore: Record<string, string> = {}; //Set,Map
-		Object.keys(obj).forEach((key: string) => {
-			if (!obj[key].length) {
-				errorStore[key] = `${key} ${msg}`;
-			}
-		});
-		return errorStore;
 	}
 }
