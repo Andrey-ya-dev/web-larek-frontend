@@ -12,6 +12,7 @@ export class Basket extends Component<IBasketView> {
 	protected _list: HTMLElement;
 	protected _total: HTMLElement;
 	protected _button: HTMLElement;
+	protected basketTotal: number;
 
 	constructor(container: HTMLElement, protected events: EventEmitter) {
 		super(container);
@@ -27,6 +28,7 @@ export class Basket extends Component<IBasketView> {
 		}
 
 		this.items = [];
+		this.basketTotal = 0;
 	}
 
 	set items(items: HTMLElement[]) {
@@ -42,7 +44,7 @@ export class Basket extends Component<IBasketView> {
 	}
 
 	set selected(items: string[]) {
-		if (items.length) {
+		if (items.length && this.basketTotal > 0) {
 			this.setDisabled(this._button, false);
 		} else {
 			this.setDisabled(this._button, true);
@@ -51,5 +53,6 @@ export class Basket extends Component<IBasketView> {
 
 	set total(total: number) {
 		this.setText(this._total, total);
+		this.basketTotal = total;
 	}
 }

@@ -140,6 +140,7 @@ export class _Form<T> extends Component<IFormState> {
 
 	onChangeInput(name: string, value: string) {
 		this.events.emit(`${name}:change`, { value, name });
+		this.events.emit(`${this.container.name}:${name}:change`, { value, name });
 	}
 
 	set valid(value: boolean) {

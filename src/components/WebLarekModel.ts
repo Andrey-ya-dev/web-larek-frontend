@@ -1,4 +1,5 @@
 import {
+	IOrder,
 	IProductItem,
 	TBasket,
 	TOrder,
@@ -14,10 +15,12 @@ export class WebLarekModel {
 		total: 0,
 	};
 	// сменить на контакты??
-	protected order: TOrder = {
-		address: '',
+	protected contacts: Pick<TOrder, 'email' | 'phone'> = {
 		phone: '',
 		email: '',
+	};
+	protected order: Partial<TOrder> = {
+		address: '',
 		payment: '',
 	};
 	protected selectedItemId: string | undefined;
@@ -65,29 +68,35 @@ export class WebLarekModel {
 	}
 
 	setOrderContact(name: TOrderField, value: string) {
-		this.order[name] = value;
-		this.events.emit('view:order:submit'); //??
-		// this.events.emit('view:contacts:submit');
 		if (name === 'address') {
+			this.order[name] = value;
 			this.events.emit('step:one:valid');
 		} else {
+			this.contacts[name] = value;
 			this.events.emit('step:two:valid');
 		}
+		this.validateDatas();
 	}
 
-	isOrderValid() {
-		return Object.values(this.order).every((value) => value.length > 0);
+	isDatasValid(obj: Partial<TOrder>) {
+		return Object.values(obj).every((value) => value.length);
+	}
+
+	getContacts() {
+		return this.contacts;
 	}
 
 	getOrder() {
-		if (this.isOrderValid()) {
-			return this.order;
-		}
+		// if (this.isDatasValid(this.order)) {}
+		return this.order;
 	}
 
 	getFinalOrder() {
-		const order = { ...this.order, ...this.basket };
-		return order;
+		this.items = this.basket.items.filter((item) => {
+			return this.getItem(item).price > 0;
+		});
+		const order = { ...this.order, ...this.contacts, ...this.basket };
+		return order as IOrder;
 	}
 
 	set items(data: string[]) {
@@ -154,9 +163,11 @@ export class WebLarekModel {
 		this.setPaymentOption('');
 		this.order = {
 			address: '',
-			email: '',
 			payment: '',
+		};
+		this.contacts = {
 			phone: '',
+			email: '',
 		};
 	}
 
@@ -166,13 +177,50 @@ export class WebLarekModel {
 			(this.order.payment === 'card' || this.order.payment === 'cash')
 		);
 	}
+	validateOrder() {
+		const orderError: Record<string, string> = {};
+		if (!this.order.address) {
+			orderError.address = 'Необходимо указать адрес';
+		}
+		if (!this.order.payment) {
+			orderError.address = 'Необходимо выбрать способ оплаты';
+		}
+		return orderError;
+	}
+	validateContacts() {
+		const contactsError: Record<string, string> = {};
+		if (!this.contacts.phone) {
+			contactsError.phone = 'Необходимо указать телефон';
+		}
+		if (!this.contacts.email) {
+			contactsError.email = 'Необходимо указать email';
+		}
+		return contactsError;
+	}
+	validateDatas() {
+		const datasError: Record<string, string> = {};
+		if (!this.contacts.phone) {
+			datasError.phone = 'Необходимо указать телефон';
+		}
+		if (!this.contacts.email) {
+			datasError.email = 'Необходимо указать email';
+		}
+		if (!this.order.address) {
+			datasError.address = 'Необходимо указать адрес';
+		}
+		if (!this.order.payment) {
+			datasError.address = 'Необходимо выбрать способ оплаты';
+		}
+		this.events.emit('formErrors:change', datasError);
+		return datasError;
+	}
 
 	validateStepTwo() {
-		return this.order.phone.length > 0 && this.order.email.length > 0;
+		return this.contacts.phone.length > 0 && this.contacts.email.length > 0;
 	}
 
 	getContactsError() {
-		const { phone, email } = this.order;
+		const { phone, email } = this.contacts;
 		if (!phone && !email) {
 			return 'Both fields are empty';
 		}
@@ -195,14 +243,10 @@ export class WebLarekModel {
 	getErrorMsg(obj: Record<string, string>, msg: string) {
 		const errorStore: Record<string, string> = {}; //Set,Map
 		Object.keys(obj).forEach((key: string) => {
-			if (!key.length) {
+			if (!obj[key].length) {
 				errorStore[key] = `${key} ${msg}`;
 			}
 		});
 		return errorStore;
-	}
-
-	validateSomeObj(obj: Record<string, string>) {
-		return !!Object.values(obj).filter((str) => str.length > 0).length;
 	}
 }

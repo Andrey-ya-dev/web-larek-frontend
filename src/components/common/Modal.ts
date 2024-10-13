@@ -1,5 +1,5 @@
 import { Component } from '../base/Component';
-import { createElement, ensureElement } from '../../utils/utils';
+import { ensureElement } from '../../utils/utils';
 import { IEvents } from '../base/events';
 
 interface IModalData {

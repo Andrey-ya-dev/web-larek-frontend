@@ -37,6 +37,6 @@ export class Page extends Component<IPage> {
 	}
 
 	set loader(element: HTMLElement) {
-		this.container.append(element);
+		this.container.insertAdjacentElement('beforeend', element);
 	}
 }
