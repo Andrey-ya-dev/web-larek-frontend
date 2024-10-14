@@ -24,12 +24,7 @@ const config = {
 		path: path.resolve(__dirname, 'dist'),
 	},
 	devServer: {
-		open: {
-			app: {
-				name: 'chrome',
-				arguments: ['--incognito'],
-			},
-		},
+		open: true,
 		host: 'localhost',
 		watchFiles: ['src/pages/*.html'],
 		hot: true,

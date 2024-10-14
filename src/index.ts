@@ -43,8 +43,6 @@ const loader = new Loader(cloneTemplate(loaderTemplate));
 page.loader = loader.render();
 loader.showLoader();
 
-// Слушатели событий
-
 events.on('items:change', () => {
 	const elements = webLarekModel.getCatalog().map((item) => {
 		return new ProductItemCard(cloneTemplate(cardCatalogTemplate), events, {
@@ -222,6 +220,3 @@ api
 	.finally(() => {
 		loader.hideLoader();
 	});
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-window.larek = webLarekModel;
