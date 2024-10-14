@@ -57,17 +57,7 @@ events.on('items:change', () => {
 });
 
 events.on('model:item:select', (item: { id: string }) => {
-	loader.showLoader();
-
-	api
-		.getOneProduct(item.id)
-		.then((product) => {
-			webLarekModel.selectItem(product.id);
-		})
-		.catch((err) => console.warn(err))
-		.finally(() => {
-			loader.hideLoader();
-		});
+	webLarekModel.selectItem(item.id);
 });
 
 events.on('view:item:select', (item: { id: string }) => {
@@ -154,7 +144,16 @@ events.on('model:payment:select', (option: { payment: TPaymentOption }) => {
 });
 
 events.on('order:submit', () => {
-	events.emit('view:contacts:open');
+	const { phone, email } = webLarekModel.getContacts();
+	const isContactsValid = webLarekModel.isDatasValid(
+		webLarekModel.getContacts()
+	);
+	modal.content = contacts.render({
+		phone,
+		email,
+		errors: [],
+		valid: isContactsValid,
+	});
 });
 
 events.on(
@@ -178,19 +177,6 @@ events.on('formErrors:change', (errorsForms: Record<TOrderField, string>) => {
 	contacts.errors = Object.values({ phone, email })
 		.filter((i) => !!i)
 		.join('; ');
-});
-
-events.on('view:contacts:open', () => {
-	const { phone, email } = webLarekModel.getContacts();
-	const isContactsValid = webLarekModel.isDatasValid(
-		webLarekModel.getContacts()
-	);
-	modal.content = contacts.render({
-		phone,
-		email,
-		errors: [],
-		valid: isContactsValid,
-	});
 });
 
 events.on('contacts:submit', () => {
