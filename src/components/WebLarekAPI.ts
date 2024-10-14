@@ -4,7 +4,7 @@ import { Api, ApiListResponse } from './base/api';
 export interface ILarekAPI {
 	getProductList: () => Promise<ApiListResponse<IProductItem>>;
 	getOneProduct: (id: string) => Promise<IProductItem>;
-	order: (data: IOrder) => Promise<{ id: string; total: number }>;
+	sendOrder: (data: IOrder) => Promise<{ id: string; total: number }>;
 }
 
 export class WebLarekAPI extends Api implements ILarekAPI {
@@ -37,7 +37,7 @@ export class WebLarekAPI extends Api implements ILarekAPI {
 		});
 	}
 
-	order(data: IOrder): Promise<{ id: string; total: number }> {
+	sendOrder(data: IOrder): Promise<{ id: string; total: number }> {
 		return this.post<{ id: string; total: number }>('/order', data).then(
 			(data) => {
 				return data;

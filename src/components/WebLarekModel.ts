@@ -1,4 +1,5 @@
 import {
+	IOrder,
 	IProductItem,
 	TBasket,
 	TOrder,
@@ -57,7 +58,6 @@ export class WebLarekModel {
 
 	setPaymentOption(option: TPaymentOption) {
 		this.order.payment = option;
-		this.events.emit('view:payment:select');
 		this.validateDatas();
 	}
 
@@ -91,7 +91,7 @@ export class WebLarekModel {
 		this.items = this.basket.items.filter((item) => {
 			return this.getItem(item).price > 0;
 		});
-		const order = { ...this.order, ...this.contacts, ...this.basket };
+		const order: IOrder = { ...this.order, ...this.contacts, ...this.basket };
 		return order;
 	}
 
@@ -160,7 +160,6 @@ export class WebLarekModel {
 
 	clearOrderData() {
 		this.selectedItemId = undefined;
-		// this.setPaymentOption('');
 		this.order = {
 			address: '',
 			payment: '',

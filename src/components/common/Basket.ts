@@ -1,11 +1,11 @@
 import { Component } from '../base/Component';
 import { createElement, ensureElement } from '../../utils/utils';
 import { EventEmitter } from '../base/events';
-// Данные которые нужны для темплейта
+
 interface IBasketView {
-	items: HTMLElement[]; //список елементов
-	total: number; // цена
-	selected: string[]; // активана\неактивна кнопка
+	items: HTMLElement[];
+	total: number;
+	selected: string[];
 }
 
 export class Basket extends Component<IBasketView> {

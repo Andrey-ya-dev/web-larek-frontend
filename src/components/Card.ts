@@ -50,7 +50,6 @@ export class Card extends Component<TCard> {
 export class ProductItemCard extends Card {
 	protected cardCategory: HTMLElement;
 	protected cardImage: HTMLElement;
-	protected cardPrice: HTMLElement;
 	protected cardDescription: HTMLElement;
 
 	constructor(
@@ -61,7 +60,6 @@ export class ProductItemCard extends Card {
 		super(container, events, actions);
 
 		this.cardCategory = container.querySelector('.card__category');
-		this.cardPrice = container.querySelector('.card__price');
 		this.cardImage = container.querySelector('.card__image');
 		this.cardDescription = container.querySelector('.card__text');
 	}
@@ -89,14 +87,6 @@ export class ProductItemCard extends Card {
 
 	set buttonText(value: string) {
 		this.setText(this.cardButton, value);
-	}
-
-	disabledBtn() {
-		this.setDisabled(this.cardButton, true);
-	}
-
-	unDisabledBtn() {
-		this.setDisabled(this.cardButton, false);
 	}
 
 	replaceCls(value: string) {

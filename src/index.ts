@@ -75,33 +75,24 @@ events.on('view:item:select', (item: { id: string }) => {
 	const isItemInBasket = webLarekModel.isItemInBasket(id);
 	const itemData = webLarekModel.getSelectedItem();
 
-	let cardFullInfo;
+	const cardFullInfo = new ProductItemCard(
+		cloneTemplate(cardFullTemplate),
+		events,
+		{
+			onClick: () =>
+				events.emit(
+					isItemInBasket ? 'model:item:remove' : 'model:item:add',
+					itemData
+				),
+		}
+	);
 
-	if (!isItemInBasket) {
-		cardFullInfo = new ProductItemCard(
-			cloneTemplate(cardFullTemplate),
-			events,
-			{
-				onClick: () => events.emit('model:item:add', itemData),
-			}
-		);
-
-		modal.render({
-			content: cardFullInfo.render({ buttonText: 'В корзину' }),
-		});
-	} else {
-		cardFullInfo = new ProductItemCard(
-			cloneTemplate(cardFullTemplate),
-			events,
-			{
-				onClick: () => events.emit('model:item:remove', itemData),
-			}
-		);
-
-		modal.render({
-			content: cardFullInfo.render({ buttonText: 'Из корзины' }),
-		});
-	}
+	modal.render({
+		content: cardFullInfo.render({
+			buttonText: isItemInBasket ? 'Убрать' : 'Купить',
+			...itemData,
+		}),
+	});
 });
 
 events.on('model:item:add', (item: { id: string }) => {
@@ -148,7 +139,14 @@ events.on('view:basket:change', () => {
 });
 
 events.on('view:order:open', () => {
-	modal.content = order.render({ errors: [''], valid: false, address: '' });
+	const { address, payment } = webLarekModel.getOrder();
+	const isOrderValid = webLarekModel.isDatasValid(webLarekModel.getOrder());
+	modal.content = order.render({
+		errors: [''],
+		valid: isOrderValid,
+		address,
+		payment,
+	});
 });
 
 events.on('model:payment:select', (option: { payment: TPaymentOption }) => {
@@ -183,22 +181,25 @@ events.on('formErrors:change', (errorsForms: Record<TOrderField, string>) => {
 });
 
 events.on('view:contacts:open', () => {
+	const { phone, email } = webLarekModel.getContacts();
+	const isContactsValid = webLarekModel.isDatasValid(
+		webLarekModel.getContacts()
+	);
 	modal.content = contacts.render({
-		phone: '',
-		email: '',
+		phone,
+		email,
 		errors: [],
-		valid: false,
+		valid: isContactsValid,
 	});
 });
 
 events.on('contacts:submit', () => {
 	loader.showLoader();
+	modal.close();
 
 	api
-		.order(webLarekModel.getFinalOrder())
+		.sendOrder(webLarekModel.getFinalOrder())
 		.then((response) => {
-			console.log(response, '=== response');
-
 			modal.render({
 				content: success.render({
 					infoPrice: response.total,
