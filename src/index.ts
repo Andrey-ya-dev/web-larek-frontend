@@ -100,7 +100,7 @@ events.on('view:item:remove', () => {
 });
 
 events.on('view:basket:open', () => {
-	basket.selected = webLarekModel.items;
+	basket.selected = webLarekModel.getBasketItems();
 	modal.render({
 		content: basket.render(),
 	});
@@ -120,8 +120,8 @@ events.on('view:basket:change', () => {
 		});
 	});
 	basket.items = elements;
-	basket.total = webLarekModel.basketTotal;
-	basket.selected = webLarekModel.items;
+	basket.total = webLarekModel.getBasketTotal();
+	basket.selected = webLarekModel.getBasketItems();
 
 	page.basketCount = webLarekModel.getBasketCountItems();
 });

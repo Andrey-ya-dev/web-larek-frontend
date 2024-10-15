@@ -36,7 +36,7 @@ export class WebLarekModel {
 	}
 
 	getBasket() {
-		return this.items.map((itemId) => {
+		return this.basket.items.map((itemId) => {
 			return this.catalog.find((item) => item.id === itemId);
 		});
 	}
@@ -88,27 +88,27 @@ export class WebLarekModel {
 	}
 
 	getFinalOrder() {
-		this.items = this.basket.items.filter((item) => {
+		this.basket.items = this.basket.items.filter((item) => {
 			return this.getItem(item).price > 0;
 		});
 		const order: IOrder = { ...this.order, ...this.contacts, ...this.basket };
 		return order;
 	}
 
-	set items(data: string[]) {
+	setBasketItems(data: string[]) {
 		this.basket.items = data;
 		this.events.emit('view:basket:change');
 	}
 
-	get items() {
+	getBasketItems() {
 		return this.basket.items;
 	}
 
-	set basketTotal(value: number) {
+	setBasketTotal(value: number) {
 		this.basket.total = value;
 	}
 
-	get basketTotal() {
+	getBasketTotal() {
 		this.calculateBasketPrice(this.catalog);
 		return this.basket.total;
 	}
@@ -123,11 +123,11 @@ export class WebLarekModel {
 	}
 
 	isItemInBasket(id: string) {
-		return this.items.find((itemId) => itemId === id);
+		return this.basket.items.find((itemId) => itemId === id);
 	}
 
 	removeItemFromBasket(id: string, isBasket?: boolean) {
-		this.items = this.items.filter((itemId) => itemId !== id);
+		this.basket.items = this.basket.items.filter((itemId) => itemId !== id);
 		this.calculateBasketPrice(this.catalog);
 
 		if (!isBasket) {
@@ -138,7 +138,7 @@ export class WebLarekModel {
 
 	calculateBasketPrice(data: IProductItem[]) {
 		const notFoundPrice = 0;
-		this.basketTotal = this.items.reduce((acc, curr) => {
+		this.basket.total = this.basket.items.reduce((acc, curr) => {
 			const product = data.find((item) => item.id === curr);
 			if (product) {
 				const { price } = product;
@@ -150,12 +150,12 @@ export class WebLarekModel {
 	}
 
 	getBasketCountItems() {
-		return this.items.length;
+		return this.basket.items.length;
 	}
 
 	clearBasketData() {
-		this.items = [];
-		this.basketTotal = 0;
+		this.setBasketItems([]);
+		this.setBasketTotal(0);
 	}
 
 	clearOrderData() {

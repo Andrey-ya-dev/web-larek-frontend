@@ -202,7 +202,10 @@ interface ErrorMessage {
 - `clearBasketData(): void` - очищает данные корзины
 - `clearOrderData(): void` - очищает данные заказа
 - `validateDatas(): Record<string, string>` - очищает данные заказа
-  так же в классе присутствуют сеттеры и геттеры установки корзины `items` и общей цены товаров `basketTotal` находящихся в корзине.
+- `setBasketItems(data: string[]): void` - устанавливает массив `id` товаров находящихся в корзине\
+- `getBasketItems(): string[]` - возвращает массив `id` товаров находящихся в корзине\
+- `setBasketTotal(value: number): void` - устанавливает общую цену товаров в корзине\
+- `getBasketTotal(): number` - возвращает общую цену товаров в корзине\
 
 ### Отображение / View / Классы представления
 
