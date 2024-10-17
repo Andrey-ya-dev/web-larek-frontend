@@ -76,7 +76,7 @@ export class WebLarekModel {
 	}
 
 	isDatasValid(obj: Partial<TOrder>) {
-		return Object.values(obj).every((value) => value.length);
+		return Object.values(obj).every((value) => value.trim().length);
 	}
 
 	getContacts() {
@@ -172,13 +172,13 @@ export class WebLarekModel {
 
 	validateDatas() {
 		const datasError: Record<string, string> = {};
-		if (!this.contacts.phone) {
+		if (!this.contacts.phone.trim()) {
 			datasError.phone = 'Необходимо указать телефон';
 		}
-		if (!this.contacts.email) {
+		if (!this.contacts.email.trim()) {
 			datasError.email = 'Необходимо указать email';
 		}
-		if (!this.order.address) {
+		if (!this.order.address.trim()) {
 			datasError.address = 'Необходимо указать адрес';
 		}
 		this.events.emit('formErrors:change', datasError);
